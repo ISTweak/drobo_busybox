@@ -3,7 +3,7 @@ LDFLAGS="-L${DEST}/lib -L${DEPS}/lib -Wl,--gc-sections"
 
 ### PCRE ###
 _build_pcre() {
-local VERSION="8.37"
+local VERSION="8.40"
 local FOLDER="pcre-${VERSION}"
 local FILE="${FOLDER}.tar.bz2"
 local URL="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/${FILE}"
@@ -16,38 +16,10 @@ make install
 popd
 }
 
-### LIBSEPOL ###
-_build_libsepol() {
-local VERSION="2.4"
-local FOLDER="libsepol-${VERSION}"
-local FILE="${FOLDER}.tar.gz"
-local URL="https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/releases/20150202/${FILE}"
-
-_download_tgz "${FILE}" "${URL}" "${FOLDER}"
-pushd "target/${FOLDER}"
-make install ARCH="arm" DESTDIR="${DEPS}" PREFIX="${DEPS}"
-rm -vf "${DEPS}/lib/libsepol.so"*
-popd
-}
-
-### LIBSELINUX ###
-# requires pcre, libsepol
-_build_libselinux() {
-local VERSION="2.4"
-local FOLDER="libselinux-${VERSION}"
-local FILE="${FOLDER}.tar.gz"
-local URL="https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/releases/20150202/${FILE}"
-
-_download_tgz "${FILE}" "${URL}" "${FOLDER}"
-pushd "target/${FOLDER}"
-make install ARCH="arm" DESTDIR="${DEPS}" PREFIX="${DEPS}"
-rm -vf "${DEPS}/lib/libselinux.so"*
-popd
-}
 
 ### BUSYBOX ###
 _build_busybox() {
-local VERSION="1.23.2"
+local VERSION="1.26.2"
 local FOLDER="busybox-${VERSION}"
 local FILE="${FOLDER}.tar.bz2"
 local URL="http://busybox.net/downloads/${FILE}"
@@ -56,9 +28,8 @@ _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-restorecon-prune.patch" "target/${FOLDER}/"
 cp -vf "src/${FOLDER}-config" "target/${FOLDER}/.config"
 pushd "target/${FOLDER}"
-patch -p1 -i "${FOLDER}-restorecon-prune.patch"
-make LDLIBS="selinux sepol pcre crypt m"
-make install LDLIBS="selinux sepol pcre m"
+make LDLIBS="pcre crypt m"
+make install LDLIBS="pcre m"
 popd
 }
 
@@ -86,8 +57,6 @@ mv -vf "${DEST}/usr/sbin/tftpd" "${DEST}/usr/bin/tftpd"
 
 _build() {
   _build_pcre
-  _build_libsepol
-  _build_libselinux
   _build_busybox
   _package
 }
