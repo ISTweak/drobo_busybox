@@ -25,7 +25,6 @@ local FILE="${FOLDER}.tar.bz2"
 local URL="http://busybox.net/downloads/${FILE}"
 
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
-cp -vf "src/${FOLDER}-restorecon-prune.patch" "target/${FOLDER}/"
 cp -vf "src/${FOLDER}-config" "target/${FOLDER}/.config"
 pushd "target/${FOLDER}"
 make LDLIBS="pcre crypt m"
